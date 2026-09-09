@@ -1,0 +1,43 @@
+# The hook and the rules it enforces live in qoax-community/qoax-githooks. The
+# `v1` tag tracks the current major line, so a new rule reaches this repository
+# on its next run without a pull request here.
+#
+# The organization's private repositories call a shared workflow in
+# qoax-reusables, which decides that version centrally. This repository is
+# public and cannot: a public repository may not call a `workflow_call`
+# workflow that lives in a private one. It calls the action directly instead.
+name: Check commit conventions
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+# A pull request may cancel its own earlier run: the next one re-checks the
+# whole range. A push may not — it is checked over the range it pushed, so
+# cancelling it would leave those commits unchecked by anything. Give each push
+# a group of its own instead.
+concurrency:
+  group: >-
+    commit-conventions-${{ github.event.pull_request.number
+      || format('{0}@{1}', github.ref, github.sha) }}
+  cancel-in-progress: true
+
+jobs:
+  commit-conventions:
+    name: Conventional Commits
+    runs-on: ubuntu-latest
+    steps:
+      # The full history is needed: the range to check is resolved from the
+      # shas the event itself carries.
+      - name: Check out this repository
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          fetch-depth: 0
+
+      - name: Check commit messages and pull request title
+        uses: qoax-community/qoax-githooks@v1
