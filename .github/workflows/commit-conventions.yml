@@ -1,11 +1,11 @@
-# The hook and the rules it enforces live in qoax-community/qoax-githooks. The
-# `v1` tag tracks the current major line, so a new rule reaches this repository
-# on its next run without a pull request here.
+# Checks the commit messages and the title of a pull request with the
+# commit-msg hook of qoax-githooks. The action also compares the tracked copy
+# at .githooks/commit-msg with the hook of the release that it pins.
 #
-# The organization's private repositories call a shared workflow in
-# qoax-reusables, which decides that version centrally. This repository is
-# public and cannot: a public repository may not call a `workflow_call`
-# workflow that lives in a private one. It calls the action directly instead.
+# The pin is a commit sha, and the comment after it names the release.
+# Dependabot moves both, but it updates the comment only while the release is
+# its last token. When a bump changes the hook, the compare fails and prints
+# the command that writes the new hook into the copy.
 name: Check commit conventions
 
 on:
@@ -29,6 +29,7 @@ concurrency:
 
 jobs:
   commit-conventions:
+    # The ruleset of this repository requires this check by its name.
     name: Conventional Commits
     runs-on: ubuntu-latest
     steps:
@@ -40,4 +41,4 @@ jobs:
           fetch-depth: 0
 
       - name: Check commit messages and pull request title
-        uses: qoax-community/qoax-githooks@v1
+        uses: qoax-community/qoax-githooks@4abc39a4da0306503a66682044f5fe8d7f929922 # v1.1.0
