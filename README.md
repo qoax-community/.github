@@ -11,11 +11,11 @@ Git hooks are local configuration, so a fresh clone has nothing enabled. Turn it
 sh scripts/setup-hooks.sh
 ```
 
-The script is safe to run again, and it checks out the [qoax-githooks](https://github.com/qoax-community/qoax-githooks) submodule under `.githooks/shared` itself if the clone left it empty.
+The script is safe to run again. It only points `core.hooksPath` at `.githooks`. The hook in that folder, `.githooks/commit-msg`, is a tracked copy of the [qoax-githooks](https://github.com/qoax-community/qoax-githooks) hook.
 
 Two things worth knowing:
 
 - On macOS the hook needs bash 4+, which means `brew install bash`. Without it the commit is written unchecked with a warning, and only CI catches a bad message.
-- Dependabot moves the submodule pin forward as the hook changes. `git config --global submodule.recurse true` makes `git pull` follow it; otherwise you keep running the version you first cloned.
+- The CI check pins a release of qoax-githooks by commit sha. It compares `.githooks/commit-msg` with the hook of that release. Dependabot opens a pull request to move the pin. If the release changes the hook, a sync commit in that pull request updates the copy. After the merge, `git pull` gives you the new hook. For details, see [Versions](https://github.com/qoax-community/qoax-githooks#versions) in the qoax-githooks README.
 
 `git commit --no-verify` skips the hook. The pull request check is not optional.
